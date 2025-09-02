@@ -42,43 +42,80 @@ export default function HomePage() {
     setLoading(true);
     setActiveTone(toneId);
     saveToHistory();
+
     const { start, end } = selection;
     const hasSelection = end > start;
-    try {
-      await new Promise((r) => setTimeout(r, 900));
 
-      // very simple demo transformation
-      const toneTag = `[${toneId}]`;
-      const transform = (s: string) =>
-        s.replace(/\s+/g, " ").trim().concat(` ${toneTag}`);
-      if (hasSelection) {
-        const before = text.slice(0, start);
-        const target = text.slice(start, end);
-        const after = text.slice(end);
-        const updated = `${before}${transform(target)}${after}`;
-        setText(updated);
-        // restore selection to end of transformed segment
-        const newPos = before.length + transform(target).length;
-        setSelection({ start: newPos, end: newPos });
-      } else {
-        setText(transform(text));
+    try {
+      // Determine what text to transform
+      const textToTransform = hasSelection ? text.slice(start, end) : text;
+
+      // Skip API call if text is too short or empty
+      if (!textToTransform.trim()) {
+        toast("No text selected to transform");
+        return;
       }
 
-      setLoading(false);
-      toast("Tone applied", { description: "Your selection was adjusted." });
+      // Call the ToneChanger API
+      const response = await fetch("/api/ToneChanger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: textToTransform,
+          toneId,
+          selection: hasSelection ? { start, end } : null,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to change tone");
+      }
+
+      const { result } = await response.json();
+
+      // Apply the transformed text
+      if (hasSelection) {
+        // Replace only the selected portion
+        const before = text.slice(0, start);
+        const after = text.slice(end);
+        const updated = `${before}${result}${after}`;
+        setText(updated);
+
+        // Update selection to cover the new transformed text
+        const newEnd = start + result.length;
+        setSelection({ start, end: newEnd });
+      } else {
+        // Replace entire text
+        setText(result);
+        // Reset selection to end of text
+        setSelection({ start: result.length, end: result.length });
+      }
+
+      toast("Tone applied", {
+        description: hasSelection
+          ? "Your selection was transformed."
+          : "Your text was transformed.",
+      });
     } catch (error) {
-      toast("Failed to change tone");
+      console.error("Tone change error:", error);
+      toast("Failed to change tone", {
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-background p-6">
+    <main className="min-h-screen  bg-background p-6">
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Tone Picker</h1>
+          <h1 className="text-3xl font-mono text-neutral-700 font-bold">
+            Tone Picker
+          </h1>
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -109,7 +146,9 @@ export default function HomePage() {
 
           {/* Tone Matrix */}
           <div className="rounded-lg border p-4">
-            <h2 className="mb-4 text-lg font-semibold">Pick Tone</h2>
+            <h2 className="mb-4 text-lg font-mono text-neutral-700 font-semibold">
+              Pick A Tone
+            </h2>
             <ToneMatrix onSelect={applyTone} />
           </div>
         </div>

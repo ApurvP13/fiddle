@@ -56,11 +56,14 @@ export default function TextEditor({
       )}
     >
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Write or paste your text. Select a portion to target tone changes.
+        <p className="text-md text-muted-foreground">
+          <span className="text-md font-bold">Write or paste your text.</span>{" "}
+          <span className="text-xs">
+            (Select a portion to target your tone changes.)
+          </span>
         </p>
         {selectedCount > 0 && (
-          <span className="rounded-full bg-muted px-2 py-1 text-xs text-muted-foreground">
+          <span className="rounded-full bg-orange-200 px-2 py-1 text-xs text-white">
             {selectedCount} selected
           </span>
         )}
