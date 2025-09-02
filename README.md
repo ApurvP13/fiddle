@@ -107,6 +107,104 @@ Transform text tone using Mistral AI.
 }
 ```
 
+## Technical Architecture & Design Decisions
+   ### Architecture Overview
+   This application follows a client-server architecture with Next.js handling both frontend and API routing. The core design prioritizes simplicity and user experience over complex state management patterns.
+### Key Technical Decisions
+1.**Next.js API Routes vs External Backend**
+
+Decision: Used Next.js API routes for the Mistral AI integration
+Rationale: Simplified deployment, reduced infrastructure complexity, and faster development
+Trade-off: Less flexibility for scaling backend logic independently, but acceptable for this scope
+
+2. **Client-Side State Management**
+
+Decision: Used React's built-in useState instead of Redux/Zustand
+Rationale: Application state is relatively simple and doesn't require complex data flow
+Trade-off: May need refactoring if state complexity grows significantly
+
+3. **Mistral AI Model Selection**
+
+Decision: Chose mistral-small-latest model
+Rationale: Balance between cost efficiency and quality for text transformation tasks
+Trade-off: Could use larger models for better quality, but at higher API costs
+
+### State Management
+The application manages state through several React hooks:
+```
+const [text, setText] = useState<string>('');           // Main text content
+const [history, setHistory] = useState<string[]>([]);   // Undo history stack
+const [selection, setSelection] = useState({...});      // Text selection tracking
+const [loading, setLoading] = useState<boolean>(false); // API call states
+```
+
+### Undo/Redo Implementation:
+
+History Stack: Each text change pushes current state to history array
+Undo Logic: Pops from history stack and restores previous state
+Memory Management: Could implement history limit to prevent memory leaks in extended sessions
+Selection Preservation: Maintains cursor position after undo operations
+
+Trade-off: Simple array-based history vs more sophisticated solutions like Command Pattern. Chose simplicity for MVP scope.
+
+### Error Handling Strategy
+1. API Level Error Handling
+
+```
+// Comprehensive error catching in route.ts
+- Validates request parameters
+- Handles Mistral API failures gracefully  
+- Returns structured error responses with appropriate HTTP codes
+```
+2. Client-Side Error Handling
+```
+// User-friendly error presentation
+- Toast notifications for user feedback
+- Graceful degradation when API fails
+- Loading states prevent multiple simultaneous requests
+```
+3. Edge Cases Addressed
+```
+Empty Text: Validates text input before API calls
+Network Failures: Timeout handling and retry logic
+Invalid API Keys: Clear error messages for configuration issues
+Selection Edge Cases: Handles text selection boundary conditions
+Concurrent Requests: Loading states prevent race conditions
+```
+4. Input Validation
+```
+Text Length: Prevents extremely long texts that could cause API timeouts
+Selection Bounds: Validates text selection indices
+Tone ID Format: Ensures valid tone identifiers
+```
+### Performance Considerations
+1. **API Optimization**
+
+- Only sends selected text portion when user selects specific text (token savings)
+- Implements loading states to prevent duplicate requests
+- Could add debouncing for rapid tone changes (future enhancement)
+
+2. **Memory Management**
+
+History array could grow indefinitely - should implement size limits
+Text transformations stored in memory only (no persistence trade-off for simplicity)
+
+### Security Considerations
+
+API Key Protection: Environment variables prevent client-side exposure
+Input Sanitization: Prevents injection attacks through text input
+CORS Configuration: API routes properly configured for same-origin requests
+
+### Scalability Trade-offs
+Current Approach: Optimized for development speed and simplicity
+Future Considerations:
+- Could implement caching for repeated transformations
+- Database persistence for user sessions
+- Rate limiting for API protection
+- WebSocket connections for real-time collaboration
+
+
+
 ## 🏗️ Project Structure
 
 ```
@@ -159,4 +257,4 @@ src/
 
 
 
-Built with ❤️ using Next.js and Mistral AI by Apurv Pandey
+Built with ❤️ using Next.js and Mistral AI by Apurv Pandey for Fiddle
