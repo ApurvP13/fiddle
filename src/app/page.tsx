@@ -11,7 +11,7 @@ export default function HomePage() {
   // Simple state
   const [text, setText] = useState("");
   const [selection, setSelection] = useState({ start: 0, end: 0 });
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTone, setActiveTone] = useState<string | null>(null);
 
