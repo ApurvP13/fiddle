@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Undo2, Redo2, RotateCcw } from "lucide-react";
+import {
+  Undo2,
+  Redo2,
+  RotateCcw,
+  BookAlert,
+  BadgeAlert,
+  Heart,
+} from "lucide-react";
 import { toast } from "sonner";
 import TextEditor from "@/components/TextEditor";
 import ToneMatrix from "@/components/ToneMatrix";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function HomePage() {
   // Simple state
@@ -150,11 +162,70 @@ export default function HomePage() {
               Pick A Tone
             </h2>
             <ToneMatrix onSelect={applyTone} />
+            <div className="flex justify-center mt-3 items-center gap-3">
+              <BadgeAlert className="text-red-500" />
+              <p className="mt-3 text-xs text-neutral-500 italic">
+                Please review AI-generated text for accuracy and appropriateness
+              </p>
+            </div>
+            <div className="flex mt-3 items-center gap-3">
+              <Heart className="text-red-500" />
+              <p className=" text-xs text-neutral-500 italic">
+                Made by{" "}
+                <a
+                  href="https://linkedin.com/in/apurv1306"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Apurv
+                </a>{" "}
+                :)
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* <Toaster /> */}
+      <div className="fixed bottom-5 right-5">
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="flex text-neutral-100 p-3 font-bold items-center gap-2 bg-neutral-900 rounded-3xl border-2 shadow-2xl border-neutral-200">
+              <BookAlert /> How To Use
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="max-w-xs p-2">
+              <div className="space-y-2 text-xs">
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 border border-neutral-50 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    1
+                  </span>
+                  <p>
+                    Select the text that you want to change (or leave it blank
+                    for the whole text)
+                  </p>
+                </div>
+                <div className="flex items-start  gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 border border-neutral-50 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    2
+                  </span>
+                  <p>Click on the tone that you want</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 border border-neutral-50 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                    3
+                  </span>
+                  <p>See your text change in the tone selected</p>
+                </div>
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <div className="fixed "></div>
     </main>
   );
 }
